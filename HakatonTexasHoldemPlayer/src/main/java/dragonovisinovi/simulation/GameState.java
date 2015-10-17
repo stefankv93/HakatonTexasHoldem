@@ -1,4 +1,4 @@
-package dragonovisinovi;
+package dragonovisinovi.simulation;
 
 import java.util.List;
 
