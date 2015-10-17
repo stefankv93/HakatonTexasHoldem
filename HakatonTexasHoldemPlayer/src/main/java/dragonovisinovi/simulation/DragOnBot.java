@@ -87,7 +87,7 @@ public class DragOnBot implements Bot {
 			}
 			id++;
 		}
-
+		
 		players.set(id, player);
 		
 	}
