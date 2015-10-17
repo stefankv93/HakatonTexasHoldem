@@ -21,7 +21,8 @@ public class GameStateData implements Cloneable{
 	private int bet;
 	private int minBeat;
 	private int bigBlind;
-	
+	private int raises;
+	private static final int MAX_RAISES = 3;
 	
 	public Object clone(){
 		GameStateData data = new GameStateData();
@@ -145,5 +146,15 @@ public class GameStateData implements Cloneable{
 	public void setCurrentIndex(int currentIndex) {
 		this.currentIndex = currentIndex;
 	}
+	public int getRaises() {
+		return raises;
+	}
+	public void setRaises(int raises) {
+		this.raises = raises;
+	}
+	public static int getMaxRaises() {
+		return MAX_RAISES;
+	}
+	
 	
 }

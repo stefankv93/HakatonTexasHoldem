@@ -33,7 +33,7 @@ public class DragOnBot implements Bot {
 		gameState.getData().setDealer(dealer);
 		gameState.getData().setPotMoney(0);
 		gameState.getData().setBet(0);
-		
+		gameState.getData().setRaises(0);
 		
 		handStatus = OngoingHandStatus.GAME_STARTED;
 		
@@ -97,48 +97,9 @@ public class DragOnBot implements Bot {
 		// TODO Auto-generated method stub
 		List<Player> players = gameState.getData().getActive();
 		
-		int id =  0;
-		for (Iterator iterator = players.iterator(); iterator.hasNext();) {
-			Player player2 = (Player) iterator.next();
-			if(player2.getName().equals(player.getName())){
-				break;
-			}
-			id++;
-		}
-		if(player.getAction() instanceof FoldAction){
-			if(id == players.size() - 1){ 
-				gameState.getData().setCurrentIndex(0);
-			}else{
-				gameState.getData().setCurrentIndex((gameState.getData().getCurrentIndex() + 1 )% gameState.getData().getActive().size());
-			}
-			players.remove(id);
-			
-		}else{
-			GameStateData data = gameState.getData();
-			Player p = player;
-			if(p.getAction() instanceof AllInAction){
-				data.setPotMoney(data.getPotMoney() + p.getCash());
-				p.payCash(p.getCash());
-			}else if(p.getAction() instanceof BetAction){
-				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount());
-				p.payCash(p.getAction().getAmount());
-			}else if(p.getAction() instanceof BigBlindAction){
-				data.setPotMoney(data.getPotMoney() + data.getBigBlind());
-				p.payCash(data.getBigBlind());
-			}else if(p.getAction() instanceof CallAction){
-				data.setPotMoney(data.getPotMoney() + data.getBet());
-				p.payCash(data.getBet());
-			}else if(p.getAction() instanceof RaiseAction){
-				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount() + data.getBet());
-				data.setBet(data.getBet() + p.getAction().getAmount());
-				p.payCash(+ p.getAction().getAmount());
-			}else if(p.getAction() instanceof SmallBlindAction){
-				data.setPotMoney(data.getBigBlind()/2);
-				data.setBet(data.getBet() + p.getAction().getAmount());
-				p.payCash(data.getBet() + p.getAction().getAmount());
-			}
-			players.set(id, player);
-		}
+
+		gameState.doAction(player);
+		
 	}
 
 	@Override
