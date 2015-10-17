@@ -17,6 +17,7 @@ public class GameStateData implements Cloneable{
 	private Player dealer;
 	private int dealerIndex;
 	private int myIndex;
+	private int currentIndex;
 	private int bet;
 	private int minBeat;
 	private int bigBlind;
@@ -138,5 +139,11 @@ public class GameStateData implements Cloneable{
 	public void setBet(int bet) {
 		this.bet = bet;
 	}
-
+	public int getCurrentIndex() {
+		return currentIndex;
+	}
+	public void setCurrentIndex(int currentIndex) {
+		this.currentIndex = currentIndex;
+	}
+	
 }

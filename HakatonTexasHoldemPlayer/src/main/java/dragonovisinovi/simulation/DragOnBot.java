@@ -7,6 +7,13 @@ import java.util.Set;
 import org.mozzartbet.hackathon.Card;
 import org.mozzartbet.hackathon.Player;
 import org.mozzartbet.hackathon.actions.Action;
+import org.mozzartbet.hackathon.actions.AllInAction;
+import org.mozzartbet.hackathon.actions.BetAction;
+import org.mozzartbet.hackathon.actions.BigBlindAction;
+import org.mozzartbet.hackathon.actions.CallAction;
+import org.mozzartbet.hackathon.actions.FoldAction;
+import org.mozzartbet.hackathon.actions.RaiseAction;
+import org.mozzartbet.hackathon.actions.SmallBlindAction;
 import org.mozzartbet.hackathon.bots.Bot;
 
 public class DragOnBot implements Bot {
@@ -40,6 +47,7 @@ public class DragOnBot implements Bot {
 		
 		handStatus = OngoingHandStatus.NEW_ACTOR_PROMOTED;
 		
+		gameState.getData().setCurrentIndex((gameState.getData().getCurrentIndex() +1)%gameState.getData().getActive().size());
 		
 		
 	}
@@ -47,20 +55,29 @@ public class DragOnBot implements Bot {
 	@Override
 	public void playerUpdated(Player player) {
 		// TODO Auto-generated method stub
-		List<Player> list = gameState.getData().getPlayers();
+		List<Player> list = gameState.getData().getActive();
 		if(handStatus == OngoingHandStatus.GAME_STARTED){
 			list.add(player);
 			if(player.getBot().getName().equals(this.getName())){
 				gameState.getData().setMyIndex(list.indexOf(player));
 			}
 			if(player.getBot().getName().equals(gameState.getData().getDealer().getName())){
-				gameState.getData().setDealerIndex(list.indexOf(player));
+				gameState.getData().setCurrentIndex(list.indexOf(player));
+				gameState.getData().setDealerIndex(gameState.getData().getCurrentIndex());
 			}
 			if (player.getCash() >= gameState.getData().getBigBlind()) {
 				gameState.getData().getActive().add(player);
             }
 		}else{
-			
+			int id = 0;
+			for (Player player2 : list) {
+				if(player2.getBot() == player.getBot()){
+					break;
+				}
+				id++;
+				
+			}
+			list.set(id, player);
 		}
 	}
 
@@ -78,18 +95,50 @@ public class DragOnBot implements Bot {
 	@Override
 	public void playerActed(Player player) {
 		// TODO Auto-generated method stub
-		List<Player> players = gameState.getData().getPlayers();
+		List<Player> players = gameState.getData().getActive();
+		
 		int id =  0;
 		for (Iterator iterator = players.iterator(); iterator.hasNext();) {
 			Player player2 = (Player) iterator.next();
-			if(player2.getName().equals(player2.getName())){
+			if(player2.getName().equals(player.getName())){
 				break;
 			}
 			id++;
 		}
-		
-		players.set(id, player);
-		
+		if(player.getAction() instanceof FoldAction){
+			if(id == players.size() - 1){ 
+				gameState.getData().setCurrentIndex(0);
+			}else{
+				gameState.getData().setCurrentIndex((gameState.getData().getCurrentIndex() + 1 )% gameState.getData().getActive().size());
+			}
+			players.remove(id);
+			
+		}else{
+			GameStateData data = gameState.getData();
+			Player p = player;
+			if(p.getAction() instanceof AllInAction){
+				data.setPotMoney(data.getPotMoney() + p.getCash());
+				p.payCash(p.getCash());
+			}else if(p.getAction() instanceof BetAction){
+				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount());
+				p.payCash(p.getAction().getAmount());
+			}else if(p.getAction() instanceof BigBlindAction){
+				data.setPotMoney(data.getPotMoney() + data.getBigBlind());
+				p.payCash(data.getBigBlind());
+			}else if(p.getAction() instanceof CallAction){
+				data.setPotMoney(data.getPotMoney() + data.getBet());
+				p.payCash(data.getBet());
+			}else if(p.getAction() instanceof RaiseAction){
+				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount() + data.getBet());
+				data.setBet(data.getBet() + p.getAction().getAmount());
+				p.payCash(+ p.getAction().getAmount());
+			}else if(p.getAction() instanceof SmallBlindAction){
+				data.setPotMoney(data.getBigBlind()/2);
+				data.setBet(data.getBet() + p.getAction().getAmount());
+				p.payCash(data.getBet() + p.getAction().getAmount());
+			}
+			players.set(id, player);
+		}
 	}
 
 	@Override
