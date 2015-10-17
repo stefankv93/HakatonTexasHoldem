@@ -19,8 +19,8 @@ public class GameStateData implements Cloneable{
 	private int myIndex;
 	private int bet;
 	private int minBeat;
-	private int rootPlayerName;
 	private int bigBlind;
+	
 	
 	public Object clone(){
 		GameStateData data = new GameStateData();
@@ -46,7 +46,7 @@ public class GameStateData implements Cloneable{
 		
 		data.dealer = dealer;
 		data.minBeat = minBeat;
-		data.rootPlayerName = rootPlayerName;
+		
 		
 		return data;
 	}
@@ -114,13 +114,6 @@ public class GameStateData implements Cloneable{
 		this.minBeat = minBeat;
 	}
 
-	public int getRootPlayerName() {
-		return rootPlayerName;
-	}
-
-	public void setRootPlayerName(int rootPlayerName) {
-		this.rootPlayerName = rootPlayerName;
-	}
 	public int getBigBlind() {
 		return bigBlind;
 	}
@@ -145,5 +138,5 @@ public class GameStateData implements Cloneable{
 	public void setBet(int bet) {
 		this.bet = bet;
 	}
-	
+
 }

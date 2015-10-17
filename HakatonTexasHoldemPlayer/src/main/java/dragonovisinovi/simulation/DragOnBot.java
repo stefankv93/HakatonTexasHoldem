@@ -1,5 +1,6 @@
 package dragonovisinovi.simulation;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class DragOnBot implements Bot {
 	public void joinedTable(int bigBlind) {
 		// TODO Auto-generated method stub
 		gameState.getData().setBigBlind(bigBlind);
+		handStatus = OngoingHandStatus.JOINED_TABLE;
 	}
 
 	@Override
@@ -23,6 +25,8 @@ public class DragOnBot implements Bot {
 		// TODO Auto-generated method stub
 		gameState.getData().setDealer(dealer);
 		gameState.getData().setPotMoney(0);
+		gameState.getData().setBet(0);
+		
 		
 		handStatus = OngoingHandStatus.GAME_STARTED;
 		
@@ -33,14 +37,10 @@ public class DragOnBot implements Bot {
 	@Override
 	public void actorRotated(Player actor) {
 		// TODO Auto-generated method stub
-		if(handStatus == OngoingHandStatus.GAME_STARTED ){
-			
-			GameStateData data = gameState.getData();
-			
-			data.setDealerIndex();
-			data.setMyIndex();
-		}
-		handStatus = OngoingHandStatus.BLINDS_SETTING;
+		
+		handStatus = OngoingHandStatus.NEW_ACTOR_PROMOTED;
+		
+		
 		
 	}
 
@@ -50,6 +50,12 @@ public class DragOnBot implements Bot {
 		List<Player> list = gameState.getData().getPlayers();
 		if(handStatus == OngoingHandStatus.GAME_STARTED){
 			list.add(player);
+			if(player.getBot().getName().equals(this.getName())){
+				gameState.getData().setMyIndex(list.indexOf(player));
+			}
+			if(player.getBot().getName().equals(gameState.getData().getDealer().getName())){
+				gameState.getData().setDealerIndex(list.indexOf(player));
+			}
 			if (player.getCash() >= gameState.getData().getBigBlind()) {
 				gameState.getData().getActive().add(player);
             }
@@ -72,7 +78,18 @@ public class DragOnBot implements Bot {
 	@Override
 	public void playerActed(Player player) {
 		// TODO Auto-generated method stub
+		List<Player> players = gameState.getData().getPlayers();
+		int id =  0;
+		for (Iterator iterator = players.iterator(); iterator.hasNext();) {
+			Player player2 = (Player) iterator.next();
+			if(player2.getName().equals(player2.getName())){
+				break;
+			}
+			id++;
+		}
 
+		players.set(id, player);
+		
 	}
 
 	@Override
