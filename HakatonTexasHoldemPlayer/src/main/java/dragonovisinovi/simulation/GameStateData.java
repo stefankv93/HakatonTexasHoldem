@@ -6,9 +6,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mozzartbet.hackathon.Card;
+import org.mozzartbet.hackathon.Deck;
 import org.mozzartbet.hackathon.Player;
 
 public class GameStateData implements Cloneable{
+	public static final int PRE_FLOP = 0;
+	public static final int FLOP = 1;
+	public static final int TURN = 2;
+	public static final int RIVER = 3;
+	public static final int HAND_OVER = 4;
+	
+	
 	private List<Card> myCards = new ArrayList<Card>();
 	private List<Card> boardCards  = new ArrayList<Card>();
 	private int myMoney;
@@ -25,10 +33,54 @@ public class GameStateData implements Cloneable{
 	private int startHandMoney;
 	private Player realPlayer;
 	
+	private int gameState;
+	private Deck deck;
+	
+	
+	
 	private static final int MAX_RAISES = 3;
 	
 	public Object clone(){
 		GameStateData data = new GameStateData();
+		data.myMoney = myMoney;
+		data.potMoney = potMoney;
+		data.dealer = dealer;
+		data.minBeat = minBeat;
+		data.startHandMoney = startHandMoney;
+		data.myIndex = myIndex;
+		data.dealerIndex = dealerIndex;
+		data.currentIndex = currentIndex;
+		data.realPlayer = realPlayer;
+		data.bet = bet;
+		data.minBeat = minBeat;
+		data.bigBlind = bigBlind;
+		data.gameState = gameState;
+		
+		Deck d = new Deck();
+		
+		int numOfCards = 0;
+		try{
+			while(true){
+				Card c = deck.deal();
+				d.deal(c.getRank(),c.getSuit());
+				numOfCards++;
+			}
+		}catch(IllegalStateException i){ }
+		
+		data.deck = new Deck();
+		try{
+			while(true){
+				Card c = d.deal();
+				data.deck.deal(c.getRank(),c.getSuit());
+			}
+		}catch(IllegalStateException i){ }
+		
+		if(numOfCards != 0){
+			deck.reset();
+			deck.deal(51 - numOfCards);
+		}
+		
+		
 		for (Iterator iterator = myCards.iterator(); iterator.hasNext();) {
 			data.myCards.add((Card) iterator.next());
 			
@@ -37,8 +89,7 @@ public class GameStateData implements Cloneable{
 			data.boardCards.add((Card) iterator.next());
 			
 		}
-		data.myMoney = myMoney;
-		data.potMoney = potMoney;
+		
 		for (Iterator iterator = active.iterator(); iterator.hasNext();) {
 			data.active.add(((Player) iterator.next()).publicClone());
 			
@@ -62,9 +113,7 @@ public class GameStateData implements Cloneable{
 			e.printStackTrace();
 		}
 		
-		data.dealer = dealer;
-		data.minBeat = minBeat;
-		data.startHandMoney = startHandMoney;
+		
 		
 		return data;
 	}
@@ -183,5 +232,23 @@ public class GameStateData implements Cloneable{
 		
 	}
 	
+	public int getGameState() {
+		return gameState;
+	}
+	public void setGameState(int gameState) {
+		this.gameState = gameState;
+	}
+	
+	public Deck getDeck() {
+		return deck;
+	}
+	public void setDeck(Deck deck) {
+		this.deck = deck;
+		deck.shuffle();
+	}
+	
+	public Player getRealPlayer() {
+		return realPlayer;
+	}
 	
 }

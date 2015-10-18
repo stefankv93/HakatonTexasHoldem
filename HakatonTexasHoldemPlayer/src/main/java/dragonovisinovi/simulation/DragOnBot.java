@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.mozzartbet.hackathon.Card;
+import org.mozzartbet.hackathon.Deck;
 import org.mozzartbet.hackathon.Player;
 import org.mozzartbet.hackathon.actions.Action;
 import org.mozzartbet.hackathon.actions.AllInAction;
@@ -28,6 +29,7 @@ public class DragOnBot implements Bot {
 	public void joinedTable(int bigBlind) {
 		// TODO Auto-generated method stub
 		gameState.getData().setBigBlind(bigBlind);
+		
 		handStatus = OngoingHandStatus.JOINED_TABLE;
 	}
 
@@ -39,6 +41,9 @@ public class DragOnBot implements Bot {
 		gameState.getData().setBet(0);
 		gameState.getData().setRaises(0);
 		gameState.getData().setCurrentIndex(0);
+		gameState.getData().setGameState(GameStateData.PRE_FLOP);
+		gameState.getData().setDeck(new Deck());
+		
 		
 		handStatus = OngoingHandStatus.GAME_STARTED;
 		
@@ -64,12 +69,12 @@ public class DragOnBot implements Bot {
 			list.add(p);
 			if(player.getName().equals(this.getName())){
 				gameState.getData().setMyMoney(player.getCash());
-				gameState.getData().setMyIndex(list.indexOf(player));
+				gameState.getData().setMyIndex(list.indexOf(p));
 				gameState.getData().setStartHandMoney(player.getCash());
 				gameState.getData().setRealPlayer(player);
 			}
 			if(player.getName().equals(gameState.getData().getDealer().getName())){
-				gameState.getData().setCurrentIndex(list.indexOf(player));
+				gameState.getData().setCurrentIndex(list.indexOf(p));
 				gameState.getData().setDealerIndex(gameState.getData().getCurrentIndex());
 			}
 			if (player.getCash() >= gameState.getData().getBigBlind()) {
@@ -117,7 +122,17 @@ public class DragOnBot implements Bot {
 					return Action.CALL;
 				}else return Action.FOLD;
 			}else{
-				return MCST.MCSTSearch(gameState, 1000, true);
+				if(isFlop()){
+					gameState.getData().setGameState(GameStateData.FLOP);
+					Deck d = gameState.getData().getDeck();
+					for(int i = 0; i<3; i++){
+						d.deal(gameState.getData().getBoardCards().get(i).getRank(), gameState.getData().getBoardCards().get(i).getSuit());
+					}
+					
+					d.deal(gameState.getData().getRealPlayer().getCards()[0].getRank(), gameState.getData().getRealPlayer().getCards()[0].getSuit());
+					d.deal(gameState.getData().getRealPlayer().getCards()[1].getRank(), gameState.getData().getRealPlayer().getCards()[1].getSuit());
+				}
+				return MCST.MCSTSearch(gameState, 500000, true);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -130,7 +145,10 @@ public class DragOnBot implements Bot {
 	private boolean isPreFlop() {
         return this.boardCards.size() == 0;
     }
-
+	
+	private boolean isFlop(){
+		return this.boardCards.size() == 3;
+	}
 	@Override
 	public String getName() {
 		return "draGAn";

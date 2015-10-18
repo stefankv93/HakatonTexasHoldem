@@ -27,7 +27,7 @@ public class Node {
 		untriedMoves = new ArrayList<>();
 		wins = 0;
 		visits = 0;
-		r = new Random();
+		r = new Random(2556);
 		move = Action.CHECK;
 	}
 	
@@ -43,7 +43,7 @@ public class Node {
 	
 	public Node selectChild(){
 		 Node selected = null;
-	        double bestValue = -Double.MAX_VALUE;
+	        /*double bestValue = -Double.MAX_VALUE;
 	        for (Node c : children) {
 	            double uctValue = c.wins / (c.visits + epsilon) +
 	                       Math.sqrt(Math.log(c.visits+1) / (c.visits + epsilon)) +
@@ -53,7 +53,10 @@ public class Node {
 	                selected = c;
 	                bestValue = uctValue;
 	            }
-	        }
+	        }*/
+		 
+		 	int rand = r.nextInt(getChildren().size());
+		 	selected = getChildren().get(rand);
 	        return selected;
 	}
 	

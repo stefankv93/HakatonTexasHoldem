@@ -95,6 +95,9 @@ public class RealGameState implements GameState {
 	public List<Action> getMoves() {
 		// TODO Auto-generated method stub
 		List<Action> actions = new ArrayList<Action>();
+		if(data.getGameState() == GameStateData.HAND_OVER){
+			return actions;
+		}
 		if(data.getActive().size() <= 1) return actions;
 		Player actor = data.getActive().get(data.getCurrentIndex());
         if (actor.isAllIn()) {
@@ -148,6 +151,16 @@ public class RealGameState implements GameState {
 		if(! (p.getAction() instanceof FoldAction)){
 			data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
 		}
+		
+		if(getData().getDealer().getName().equals(p.getName())){
+			//if(getData().getBet() == 0) {
+				getData().setGameState(getData().getGameState()+1);
+				if(getData().getGameState() < GameStateData.HAND_OVER){
+					getData().getBoardCards().add(getData().getDeck().deal());
+				}
+			//}
+		}
+		
 		
 		
 	}
