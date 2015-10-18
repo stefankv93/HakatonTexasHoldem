@@ -9,6 +9,7 @@ import java.util.Set;
 import org.mozzartbet.hackathon.actions.Action;
 import org.mozzartbet.hackathon.actions.AllInAction;
 import org.mozzartbet.hackathon.actions.BetAction;
+import org.mozzartbet.hackathon.actions.BigBlindAction;
 import org.mozzartbet.hackathon.actions.CallAction;
 import org.mozzartbet.hackathon.actions.CheckAction;
 import org.mozzartbet.hackathon.actions.FoldAction;
@@ -18,7 +19,8 @@ import org.mozzartbet.hackathon.Player;
 import org.mozzartbet.hackathon.TableType;
 
 public class RealGameState implements GameState {
-	private GameStateData data;
+	private GameStateData data = new GameStateData();
+	private double res;
 	
 	@Override
 	public GameState clone() {
@@ -29,7 +31,7 @@ public class RealGameState implements GameState {
 	}
 
 	@Override
-	public void doAction(Player p) {
+	public void doAction(Player pl) {
 		// TODO Auto-generated method stub
 //		data.getPlayers().remove(p.getName());//ovo mora da se menja!!!!
 //		data.getPlayers().add(p);
@@ -37,12 +39,14 @@ public class RealGameState implements GameState {
 		int id =  0;
 		for (Iterator iterator = data.getActive().iterator(); iterator.hasNext();) {
 			Player player2 = (Player) iterator.next();
-			if(player2.getName().equals(p.getName())){
+			if(player2.getName().equals(pl.getName())){
 				break;
 			}
 			id++;
 		}
-		if(p.getAction() instanceof FoldAction){
+		Player p = data.getActive().get(id);
+		
+		if(pl.getAction() instanceof FoldAction){
 			if(id == data.getActive().size() - 1){ 
 				data.setCurrentIndex(0);
 			}else{
@@ -50,31 +54,31 @@ public class RealGameState implements GameState {
 			}
 			data.getActive().remove(id);
 			
-		}else if(p.getAction() instanceof AllInAction){
+		}else if(pl.getAction() instanceof AllInAction){
 			data.setPotMoney(data.getPotMoney() + p.getCash());
 			p.setBet(p.getCash());
 			p.payCash(p.getCash());
-		}else if(p.getAction() instanceof BetAction){
+		}else if(pl.getAction() instanceof BetAction){
 			data.setPotMoney(data.getPotMoney() + p.getAction().getAmount());
 			p.setBet(p.getBet() +p.getAction().getAmount());
 			p.payCash(p.getAction().getAmount());
-		}else if(p.getAction() instanceof BetAction){
+		}else if(pl.getAction() instanceof BigBlindAction){
 			data.setPotMoney(data.getPotMoney() + data.getBigBlind());
 			p.setBet(p.getBet() +data.getBigBlind());
 			p.payCash(data.getBigBlind());
-		}else if(p.getAction() instanceof CallAction){
+		}else if(pl.getAction() instanceof CallAction){
 			data.setPotMoney(data.getPotMoney() + data.getBet());
 			p.setBet(p.getBet() +data.getBigBlind());
 			p.payCash(data.getBet());
-		}else if(p.getAction() instanceof RaiseAction){
+		}else if(pl.getAction() instanceof RaiseAction){
 			data.setPotMoney(data.getPotMoney() + p.getAction().getAmount() + data.getBet());
 			data.setBet(data.getBet() + p.getAction().getAmount());
 			p.setBet(p.getBet() +  p.getAction().getAmount() + data.getBet());
 			p.payCash( p.getAction().getAmount());
 			data.setRaises(data.getRaises()+ 1);
-		}else if(p.getAction() instanceof SmallBlindAction){
+		}else if(pl.getAction() instanceof SmallBlindAction){
 			data.setPotMoney(data.getPotMoney() + data.getBigBlind()/2);
-			data.setBet(data.getBet() + data.getBigBlind()/2);
+			data.setBet(data.getBet() + data.getBigBlind()/2);//TODO mozda ne treba!!!
 			p.setBet(data.getBet() + data.getBigBlind()/2);
 			p.payCash(data.getBigBlind()/2);
 		}
@@ -120,8 +124,7 @@ public class RealGameState implements GameState {
 
 	@Override
 	public double getResult() {
-		// TODO Auto-generated method stub
-		return 0;
+		return res;
 	}
 
 	public GameStateData getData() {
@@ -137,7 +140,7 @@ public class RealGameState implements GameState {
 		// TODO Auto-generated method stub
 		
 		Player p = data.getActive().get(data.getCurrentIndex());
-		
+		p.setAction(a);
 		doAction(p);
 //		for (Iterator iterator = data.getActive().iterator(); iterator.hasNext();) {
 //			Player player2 = (Player) iterator.next();
@@ -180,6 +183,16 @@ public class RealGameState implements GameState {
 //			}
 //			data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
 //		}
+	}
+
+	@Override
+	public void setResult(double rez) {
+		res = rez;
+	}
+
+	@Override
+	public double getMoney() {
+		return data.getActive().get(data.getMyIndex()).getCash();
 	}
 	
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.mozzartbet.hackathon.Player;
 import org.mozzartbet.hackathon.actions.Action;
 
 import dragonovisinovi.simulation.GameState;
@@ -16,6 +17,7 @@ public class Node {
 	private int visits;
 	private List<Action> untriedMoves;
 	//private int playerJustMoved;//dodati player
+	private Player playerJustMoved;
 	private GameState state;
 	private final static double epsilon = 1e-6;
 	private Random r;
@@ -34,7 +36,7 @@ public class Node {
 		this.move = move;
 		this.state = state;
 		untriedMoves = state.getMoves();
-		//playerJustMoved = ...'
+		//playerJustMoved = 
 		
 	}
 	
@@ -84,6 +86,10 @@ public class Node {
 	
 	public Node getParrent(){
 		return parrent;
+	}
+	
+	public int getVisits(){
+		return visits;
 	}
 	
 	public String TreeToString(int indent){

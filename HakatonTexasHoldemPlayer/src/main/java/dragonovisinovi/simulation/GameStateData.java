@@ -52,8 +52,8 @@ public class GameStateData implements Cloneable{
 		
 		return data;
 	}
-	public List<Card> getMyCards() {
-		return myCards;
+	public Card [] getMyCards() {
+		return active.get(myIndex).getCards();
 	}
 
 	public void setMyCards(List<Card> myCards) {

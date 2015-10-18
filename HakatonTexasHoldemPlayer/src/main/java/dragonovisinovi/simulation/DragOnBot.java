@@ -16,9 +16,12 @@ import org.mozzartbet.hackathon.actions.RaiseAction;
 import org.mozzartbet.hackathon.actions.SmallBlindAction;
 import org.mozzartbet.hackathon.bots.Bot;
 
+import dragonovisinovi.mcts.MCST;
+
 public class DragOnBot implements Bot {
 	private RealGameState gameState = new RealGameState();
 	private int handStatus;
+	private List<Card> boardCards;
 	
 	@Override
 	public void joinedTable(int bigBlind) {
@@ -55,13 +58,14 @@ public class DragOnBot implements Bot {
 	@Override
 	public void playerUpdated(Player player) {
 		// TODO Auto-generated method stub
-		List<Player> list = gameState.getData().getActive();
+		List<Player> list = gameState.getData().getPlayers();
 		if(handStatus == OngoingHandStatus.GAME_STARTED){
 			list.add(player);
-			if(player.getBot().getName().equals(this.getName())){
+			if(player.getName().equals(this.getName())){
+				gameState.getData().setMyMoney(player.getCash());
 				gameState.getData().setMyIndex(list.indexOf(player));
 			}
-			if(player.getBot().getName().equals(gameState.getData().getDealer().getName())){
+			if(player.getName().equals(gameState.getData().getDealer().getName())){
 				gameState.getData().setCurrentIndex(list.indexOf(player));
 				gameState.getData().setDealerIndex(gameState.getData().getCurrentIndex());
 			}
@@ -71,7 +75,7 @@ public class DragOnBot implements Bot {
 		}else{
 			int id = 0;
 			for (Player player2 : list) {
-				if(player2.getBot() == player.getBot()){
+				if(player2.getName() == player.getName()){
 					break;
 				}
 				id++;
@@ -89,7 +93,7 @@ public class DragOnBot implements Bot {
 		gameState.getData().setBet(bet);
 		gameState.getData().setPotMoney(pot);
 		
-
+		boardCards = cards;
 	}
 
 	@Override
@@ -104,14 +108,26 @@ public class DragOnBot implements Bot {
 
 	@Override
 	public Action act(int minBet, int currentBet, Set<Action> allowedActions, int currentAmount) {
-		// TODO Auto-generated method stub
-		return null;
+		if(isPreFlop()){
+			if(allowedActions.contains(Action.CHECK)){
+				return Action.CHECK;
+			}else if(allowedActions.contains(Action.CALL)){
+				return Action.CALL;
+			}else return Action.FOLD;
+		}else{
+			return MCST.MCSTSearch(gameState, 1000);
+		}
+		
+		
 	}
+	
+	private boolean isPreFlop() {
+        return this.boardCards.size() == 0;
+    }
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "draGAn";
 	}
 
 }

@@ -5,7 +5,6 @@ import java.util.Random;
 import org.mozzartbet.hackathon.actions.Action;
 
 import dragonovisinovi.simulation.GameState;
-import dragonovisinovi.simulation.Player;
 
 public class MCST {
 	public static Action MCSTSearch(GameState gState, int numOfIterations, boolean printTree){
@@ -16,6 +15,7 @@ public class MCST {
 		for(int i = 0; i<numOfIterations; i++){
 			Node node = root;
 			GameState state = gState.clone();
+			double startVal = state.getMoney();
 			
 			
 			//Selection
@@ -35,8 +35,11 @@ public class MCST {
 			while (state.getMoves().size() != 0){
 				int rand = r.nextInt(state.getMoves().size());
 				Action a = state.getMoves().get(rand);
-				state.doAction(a); //TODO player i ovo sranje je sada random...
-			}
+				state.doAction(a); //TODO ovo sranje je sada random..
+			} 
+			
+			double val = startVal - state.getMoney();
+			state.setResult(val);
 			
 			//Backpropagation
 			while (node != null){
@@ -48,9 +51,10 @@ public class MCST {
 		
 		Node max = null; double maxValue=Double.MIN_VALUE;
 		for(Node n: root.getChildren()){
-			if(n.getValue() > maxValue){
+			double val = n.getValue()/n.getVisits();
+			if(val > maxValue){
 				max = n;
-				maxValue = n.getValue();
+				maxValue = val;
 			}
 		}
 		

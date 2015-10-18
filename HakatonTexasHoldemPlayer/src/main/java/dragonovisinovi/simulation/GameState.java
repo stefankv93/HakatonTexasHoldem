@@ -11,5 +11,7 @@ public interface GameState {
 	public void doAction(Action a);
 	public double simulate();
 	public List<Action> getMoves();
+	public void setResult(double rez);
 	public double getResult();
+	public double getMoney();
 }
