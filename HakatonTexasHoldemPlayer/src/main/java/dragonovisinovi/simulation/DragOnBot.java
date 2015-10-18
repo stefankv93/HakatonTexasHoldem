@@ -1,5 +1,6 @@
 package dragonovisinovi.simulation;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class DragOnBot implements Bot {
 		gameState.getData().setPotMoney(0);
 		gameState.getData().setBet(0);
 		gameState.getData().setRaises(0);
+		gameState.getData().setCurrentIndex(0);
 		
 		handStatus = OngoingHandStatus.GAME_STARTED;
 		
@@ -46,8 +48,6 @@ public class DragOnBot implements Bot {
 
 	@Override
 	public void actorRotated(Player actor) {
-		// TODO Auto-generated method stub
-		
 		handStatus = OngoingHandStatus.NEW_ACTOR_PROMOTED;
 		
 		gameState.getData().setCurrentIndex((gameState.getData().getCurrentIndex() +1)%gameState.getData().getActive().size());
@@ -59,23 +59,26 @@ public class DragOnBot implements Bot {
 	public void playerUpdated(Player player) {
 		// TODO Auto-generated method stub
 		List<Player> list = gameState.getData().getPlayers();
+		Player p = player.publicClone();
 		if(handStatus == OngoingHandStatus.GAME_STARTED){
-			list.add(player);
+			list.add(p);
 			if(player.getName().equals(this.getName())){
 				gameState.getData().setMyMoney(player.getCash());
 				gameState.getData().setMyIndex(list.indexOf(player));
+				gameState.getData().setStartHandMoney(player.getCash());
+				gameState.getData().setRealPlayer(player);
 			}
 			if(player.getName().equals(gameState.getData().getDealer().getName())){
 				gameState.getData().setCurrentIndex(list.indexOf(player));
 				gameState.getData().setDealerIndex(gameState.getData().getCurrentIndex());
 			}
 			if (player.getCash() >= gameState.getData().getBigBlind()) {
-				gameState.getData().getActive().add(player);
+				gameState.getData().getActive().add(p);
             }
 		}else{
 			int id = 0;
 			for (Player player2 : list) {
-				if(player2.getName() == player.getName()){
+				if(player2.getName().equals(player.getName())){
 					break;
 				}
 				id++;
@@ -87,7 +90,6 @@ public class DragOnBot implements Bot {
 
 	@Override
 	public void boardUpdated(List<Card> cards, int bet, int pot) {
-		// TODO Auto-generated method stub
 		handStatus = OngoingHandStatus.BOARD_UPDATED;
 		gameState.getData().setBoardCards(cards);
 		gameState.getData().setBet(bet);
@@ -98,7 +100,6 @@ public class DragOnBot implements Bot {
 
 	@Override
 	public void playerActed(Player player) {
-		// TODO Auto-generated method stub
 		List<Player> players = gameState.getData().getActive();
 		
 
@@ -108,14 +109,19 @@ public class DragOnBot implements Bot {
 
 	@Override
 	public Action act(int minBet, int currentBet, Set<Action> allowedActions, int currentAmount) {
-		if(isPreFlop()){
-			if(allowedActions.contains(Action.CHECK)){
-				return Action.CHECK;
-			}else if(allowedActions.contains(Action.CALL)){
-				return Action.CALL;
-			}else return Action.FOLD;
-		}else{
-			return MCST.MCSTSearch(gameState, 1000);
+		try{
+			if(isPreFlop()){
+				if(allowedActions.contains(Action.CHECK)){
+					return Action.CHECK;
+				}else if(allowedActions.contains(Action.CALL)){
+					return Action.CALL;
+				}else return Action.FOLD;
+			}else{
+				return MCST.MCSTSearch(gameState, 1000, true);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return Action.CALL;
 		}
 		
 		

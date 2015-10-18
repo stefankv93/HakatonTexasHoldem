@@ -22,6 +22,9 @@ public class GameStateData implements Cloneable{
 	private int minBeat;
 	private int bigBlind;
 	private int raises;
+	private int startHandMoney;
+	private Player realPlayer;
+	
 	private static final int MAX_RAISES = 3;
 	
 	public Object clone(){
@@ -36,24 +39,37 @@ public class GameStateData implements Cloneable{
 		}
 		data.myMoney = myMoney;
 		data.potMoney = potMoney;
-		for (Iterator iterator = players.iterator(); iterator.hasNext();) {
-			data.players.add((Player) iterator.next());
+		for (Iterator iterator = active.iterator(); iterator.hasNext();) {
+			data.active.add(((Player) iterator.next()).publicClone());
 			
 		}
-		
-		for (Iterator iterator = active.iterator(); iterator.hasNext();) {
-			data.active.add((Player) iterator.next());
-			
+		try{
+		for (Iterator iterator = players.iterator(); iterator.hasNext();) {
+			int excists = 0;
+			Player player = (Player) iterator.next();
+			for (Iterator iterator2 = data.active.iterator(); iterator2.hasNext();) {
+				Player player2 = (Player) iterator2.next();
+				if(player.getName().equals(player2.getName())){
+					excists = 1;
+					data.players.add(player2);
+					break;
+				}
+			}
+			if(excists== 0)
+				data.players.add(player.publicClone());
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		
 		data.dealer = dealer;
 		data.minBeat = minBeat;
-		
+		data.startHandMoney = startHandMoney;
 		
 		return data;
 	}
 	public Card [] getMyCards() {
-		return active.get(myIndex).getCards();
+		return realPlayer.getCards();
 	}
 
 	public void setMyCards(List<Card> myCards) {
@@ -154,6 +170,17 @@ public class GameStateData implements Cloneable{
 	}
 	public static int getMaxRaises() {
 		return MAX_RAISES;
+	}
+	
+	public int getStartHandMoney() {
+		return startHandMoney;
+	}
+	public void setStartHandMoney(int startHandMoney) {
+		this.startHandMoney = startHandMoney;
+	}
+	public void setRealPlayer(Player player) {
+		realPlayer = player;
+		
 	}
 	
 	

@@ -45,12 +45,13 @@ public class RealGameState implements GameState {
 			id++;
 		}
 		Player p = data.getActive().get(id);
+		p.setAction(pl.getAction());
 		
 		if(pl.getAction() instanceof FoldAction){
 			if(id == data.getActive().size() - 1){ 
 				data.setCurrentIndex(0);
 			}else{
-				data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
+//				data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
 			}
 			data.getActive().remove(id);
 			
@@ -59,9 +60,9 @@ public class RealGameState implements GameState {
 			p.setBet(p.getCash());
 			p.payCash(p.getCash());
 		}else if(pl.getAction() instanceof BetAction){
-			data.setPotMoney(data.getPotMoney() + p.getAction().getAmount());
-			p.setBet(p.getBet() +p.getAction().getAmount());
-			p.payCash(p.getAction().getAmount());
+			data.setPotMoney(data.getPotMoney() + pl.getAction().getAmount());
+			p.setBet(p.getBet() + pl.getAction().getAmount());
+			p.payCash(pl.getAction().getAmount());
 		}else if(pl.getAction() instanceof BigBlindAction){
 			data.setPotMoney(data.getPotMoney() + data.getBigBlind());
 			p.setBet(p.getBet() +data.getBigBlind());
@@ -71,10 +72,10 @@ public class RealGameState implements GameState {
 			p.setBet(p.getBet() +data.getBigBlind());
 			p.payCash(data.getBet());
 		}else if(pl.getAction() instanceof RaiseAction){
-			data.setPotMoney(data.getPotMoney() + p.getAction().getAmount() + data.getBet());
-			data.setBet(data.getBet() + p.getAction().getAmount());
-			p.setBet(p.getBet() +  p.getAction().getAmount() + data.getBet());
-			p.payCash( p.getAction().getAmount());
+			data.setPotMoney(data.getPotMoney() + pl.getAction().getAmount() + data.getBet());
+			data.setBet(data.getBet() + pl.getAction().getAmount());
+			p.setBet(p.getBet() +  pl.getAction().getAmount() + data.getBet());
+			p.payCash( pl.getAction().getAmount() + data.getBet());
 			data.setRaises(data.getRaises()+ 1);
 		}else if(pl.getAction() instanceof SmallBlindAction){
 			data.setPotMoney(data.getPotMoney() + data.getBigBlind()/2);
@@ -94,6 +95,7 @@ public class RealGameState implements GameState {
 	public List<Action> getMoves() {
 		// TODO Auto-generated method stub
 		List<Action> actions = new ArrayList<Action>();
+		if(data.getActive().size() <= 1) return actions;
 		Player actor = data.getActive().get(data.getCurrentIndex());
         if (actor.isAllIn()) {
             actions.add(Action.CHECK);
@@ -142,47 +144,12 @@ public class RealGameState implements GameState {
 		Player p = data.getActive().get(data.getCurrentIndex());
 		p.setAction(a);
 		doAction(p);
-//		for (Iterator iterator = data.getActive().iterator(); iterator.hasNext();) {
-//			Player player2 = (Player) iterator.next();
-//			if(player2.getName().equals(p.getName())){
-//				break;
-//			}
-//			id++;
-//		}
-//		if(p.getAction() instanceof FoldAction){
-//			if(id == data.getActive().size() - 1){ 
-//				data.setCurrentIndex(0);
-//			}else{
-//				data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
-//			}
-//			data.getActive().remove(id);
-//			
-//		}else{ 
-//			
-//		
-//			if(p.getAction() instanceof AllInAction){
-//				data.setPotMoney(data.getPotMoney() + p.getCash());
-//				p.payCash(p.getCash());
-//			}else if(p.getAction() instanceof BetAction){
-//				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount());
-//				p.payCash(p.getAction().getAmount());
-//			}else if(p.getAction() instanceof BetAction){
-//				data.setPotMoney(data.getPotMoney() + data.getBigBlind());
-//				p.payCash(data.getBigBlind());
-//			}else if(p.getAction() instanceof CallAction){
-//				data.setPotMoney(data.getPotMoney() + data.getBet());
-//				p.payCash(data.getBet());
-//			}else if(p.getAction() instanceof RaiseAction){
-//				data.setPotMoney(data.getPotMoney() + p.getAction().getAmount() + data.getBet());
-//				data.setBet(data.getBet() + p.getAction().getAmount());
-//				p.payCash(+ p.getAction().getAmount());
-//			}else if(p.getAction() instanceof SmallBlindAction){
-//				data.setPotMoney(data.getBigBlind()/2);
-//				data.setBet(data.getBet() + p.getAction().getAmount());
-//				p.payCash(data.getBet() + p.getAction().getAmount());
-//			}
-//			data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
-//		}
+		
+		if(! (p.getAction() instanceof FoldAction)){
+			data.setCurrentIndex((data.getCurrentIndex() + 1 )% data.getActive().size());
+		}
+		
+		
 	}
 
 	@Override
@@ -192,7 +159,7 @@ public class RealGameState implements GameState {
 
 	@Override
 	public double getMoney() {
-		return data.getActive().get(data.getMyIndex()).getCash();
+		return data.getPlayers().get(data.getMyIndex()).getCash();//getActive().get(data.getMyIndex()).getCash();
 	}
 	
 

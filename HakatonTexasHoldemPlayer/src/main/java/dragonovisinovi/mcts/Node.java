@@ -28,6 +28,7 @@ public class Node {
 		wins = 0;
 		visits = 0;
 		r = new Random();
+		move = Action.CHECK;
 	}
 	
 	public Node(Node parrent, Action move, GameState state){
@@ -42,7 +43,7 @@ public class Node {
 	
 	public Node selectChild(){
 		 Node selected = null;
-	        double bestValue = Double.MIN_VALUE;
+	        double bestValue = -Double.MAX_VALUE;
 	        for (Node c : children) {
 	            double uctValue = c.wins / (c.visits + epsilon) +
 	                       Math.sqrt(Math.log(c.visits+1) / (c.visits + epsilon)) +
